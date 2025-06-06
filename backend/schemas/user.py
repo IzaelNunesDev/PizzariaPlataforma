@@ -31,3 +31,9 @@ class User(UserInDBBase):
 # Additional properties stored in DB
 class UserInDB(UserInDBBase):
     hashed_password: str
+
+
+# Schema for password change
+class PasswordChange(BaseModel):
+    old_password: str
+    new_password: str

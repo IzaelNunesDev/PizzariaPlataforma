@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { fetchWrapper } from '../lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -32,23 +33,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = useCallback(async (authToken: string) => {
     try {
-      const response = await fetch(`${API_URL}/auth/users/me`, {
+      const response = await fetchWrapper(`${API_URL}/auth/users/me`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
       });
-      if (!response.ok) {
-        throw new Error('Failed to fetch user data');
-      }
       const userData: User = await response.json();
       setUser(userData);
       setToken(authToken);
       localStorage.setItem('authToken', authToken);
     } catch (err: any) {
-      console.error(err);
+      console.error("Fetch user error in AuthContext:", err.message); // Log the message from fetchWrapper
       setUser(null);
       setToken(null);
       localStorage.removeItem('authToken');
+      // Optionally, set the error state for the context consumers
+      // setError(err.message || 'Failed to authenticate user.');
     }
   }, []);
 

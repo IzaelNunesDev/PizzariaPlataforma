@@ -16,6 +16,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { CreditCard, ShoppingBag, User, Mail, Home, Phone } from 'lucide-react';
 import Image from 'next/image';
+import { fetchWrapper } from '../lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -75,7 +76,11 @@ export default function CheckoutPage() {
     };
     
     try {
-      const response = await fetch(`${API_URL}/orders/`, {
+      // N.B. fetchWrapper does not return JSON directly, so if you need the response body,
+      // you'll need to call response.json() after this.
+      // However, for this specific POST request, we might only care about success/failure,
+      // and then the success toast. If the response body is needed, it should be processed.
+      await fetchWrapper(`${API_URL}/orders/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,11 +89,7 @@ export default function CheckoutPage() {
         body: JSON.stringify(orderPayload)
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Failed to place order.");
-      }
-
+      // If fetchWrapper completes without throwing, the request was successful (response.ok was true).
       toast({
         title: "Order Placed!",
         description: "Thank you for your order. We've received it and will process it shortly.",
