@@ -96,3 +96,22 @@ def delete_menu_item(
         raise HTTPException(status_code=404, detail="Menu item not found")
     deleted_menu_item = crud_menu.delete_menu_item(db=db, menu_item_id=menu_item_id)
     return deleted_menu_item
+
+@router.get("/", response_model=List[menu_schemas.MenuItem])
+def read_menu_items(
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100,
+    category: str = Query(None, description="Filter menu items by category"),
+    q: str = Query(None, description="Search query for item name or description") # Adicionar parâmetro de busca
+):
+    """
+    Retrieve all menu items, optionally filtered by category or search query.
+    """
+    if q:
+        menu_items = crud_menu.search_menu_items(db, query=q, skip=skip, limit=limit)
+    elif category:
+        menu_items = crud_menu.get_menu_items_by_category(db, category=category, skip=skip, limit=limit)
+    else:
+        menu_items = crud_menu.get_menu_items(db, skip=skip, limit=limit)
+    return menu_items

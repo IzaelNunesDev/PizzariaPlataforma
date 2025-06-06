@@ -1,5 +1,6 @@
 # backend/crud/crud_menu.py
 from sqlalchemy.orm import Session
+from sqlalchemy import or_ # Import or_
 from typing import List, Optional
 
 from database import models
@@ -54,3 +55,19 @@ def delete_menu_item(db: Session, menu_item_id: str) -> Optional[models.MenuItem
         db.delete(db_menu_item)
         db.commit()
     return db_menu_item
+
+# NOVA FUNÇÃO: Search menu items by name or description
+def search_menu_items(db: Session, query: str, skip: int = 0, limit: int = 100) -> List[models.MenuItem]:
+    search_query = f"%{query}%"
+    return (
+        db.query(models.MenuItem)
+        .filter(
+            or_(
+                models.MenuItem.name.ilike(search_query),
+                models.MenuItem.description.ilike(search_query)
+            )
+        )
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
