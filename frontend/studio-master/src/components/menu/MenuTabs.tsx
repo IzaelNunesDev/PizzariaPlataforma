@@ -6,6 +6,8 @@ import MenuItemCard from './MenuItemCard';
 // import { menuItems } from '@/data/menu'; // Removed local import
 import type { MenuCategory, MenuItem } from '@/types';
 import { Pizza, Drumstick, CupSoda, CakeSlice } from 'lucide-react'; // Using CakeSlice for Desserts
+import { Skeleton } from "@/components/ui/skeleton";
+import { fetchWrapper } from '../../lib/api';
 
 const categoryIcons: Record<MenuCategory, React.ElementType> = {
   pizza: Pizza,
@@ -35,10 +37,7 @@ export default function MenuTabs() {
     const fetchMenuItems = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/menu`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const response = await fetchWrapper(`${API_URL}/menu`);
         const data: MenuItem[] = await response.json();
         setAllMenuItems(data);
         setError(null);
@@ -59,7 +58,13 @@ export default function MenuTabs() {
   };
 
   if (loading) {
-    return <p className="text-center py-10">Loading menu...</p>; // Or a spinner component
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <Skeleton key={index} className="h-[350px] w-full rounded-lg" />
+        ))}
+      </div>
+    );
   }
 
   if (error) {

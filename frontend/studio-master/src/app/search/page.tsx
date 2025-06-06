@@ -7,6 +7,8 @@ import Footer from '@/components/layout/Footer';
 import MenuItemCard from '@/components/menu/MenuItemCard';
 import { type MenuItem } from '@/types';
 import { Loader2, SearchX } from 'lucide-react';
+import { Skeleton } from "@/components/ui/skeleton";
+import { fetchWrapper } from '../lib/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -27,10 +29,7 @@ function SearchResults() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_URL}/menu?q=${encodeURIComponent(query)}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch search results.');
-        }
+        const response = await fetchWrapper(`${API_URL}/menu?q=${encodeURIComponent(query)}`);
         const data = await response.json();
         setResults(data);
       } catch (err: any) {
@@ -51,8 +50,10 @@ function SearchResults() {
       </p>
 
       {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-[350px] w-full rounded-lg" />
+          ))}
         </div>
       ) : error ? (
         <p className="text-center text-destructive">{error}</p>

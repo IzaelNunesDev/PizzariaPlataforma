@@ -10,6 +10,8 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Skeleton } from "@/components/ui/skeleton";
+import { fetchWrapper } from '../lib/api';
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -42,14 +44,11 @@ export default function OrderHistoryPage() {
     if (token) {
       const fetchOrders = async () => {
         try {
-          const response = await fetch(`${API_URL}/orders/me`, {
+          const response = await fetchWrapper(`${API_URL}/orders/me`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
           });
-          if (!response.ok) {
-            throw new Error('Failed to fetch order history.');
-          }
           const data = await response.json();
           setOrders(data);
         } catch (err: any) {
@@ -75,9 +74,13 @@ export default function OrderHistoryPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {isLoading ? (
-              <div className="flex justify-center items-center py-10">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="ml-4 text-muted-foreground">Loading your orders...</p>
+              <div className="space-y-6">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index}>
+                    <Skeleton className="h-10 w-full rounded-md my-2" />
+                    <Skeleton className="h-12 w-full rounded-md mb-4" />
+                  </div>
+                ))}
               </div>
             ) : error ? (
               <p className="text-center text-destructive">{error}</p>
